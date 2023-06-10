@@ -14,6 +14,13 @@ class BOID_V2_API ABoid : public AActor
 	
 private:
 	FVector velocity;
+	void AdjustVectorTowards(float DeltaTime, FVector targetLocation, float force);
+	FVector GetCoherencePoint(TArray< AActor* > actors);
+	FVector GetSeparationPoint(TArray< AActor* > actors);
+	FVector GetAlignmentPoint(TArray< AActor* > actors);
+	void Move(float DeltaTime);
+	void RotateWithVelocity();
+	TArray< AActor* > GetOverlappingActors();
 
 public:	
 	// Sets default values for this actor's properties
@@ -22,6 +29,7 @@ public:
 	UStaticMeshComponent* VisualMesh;
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* SphereComponent;
+	FVector GetVelocity();
 
 protected:
 	// Called when the game starts or when spawned
