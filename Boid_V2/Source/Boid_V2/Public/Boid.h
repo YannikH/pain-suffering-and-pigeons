@@ -13,8 +13,7 @@ class BOID_V2_API ABoid : public AActor
 	GENERATED_BODY()
 	
 private:
-	FVector velocity;
-	void AdjustVectorTowards(float DeltaTime, FVector targetLocation, float force);
+	void AdjustVectorTowards(float DeltaTime, FVector targetLocation, float force, FColor debugColor);
 	FVector GetCoherencePoint(TArray< AActor* > actors);
 	FVector GetSeparationPoint(TArray< AActor* > actors);
 	FVector GetAlignmentPoint(TArray< AActor* > actors);
@@ -30,6 +29,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* SphereComponent;
 	FVector GetVelocity();
+	FVector velocity;
 
 protected:
 	// Called when the game starts or when spawned
