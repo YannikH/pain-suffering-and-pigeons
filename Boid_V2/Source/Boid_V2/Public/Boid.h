@@ -31,6 +31,18 @@ public:
 	FVector GetVelocity();
 	FVector velocity;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
+	float coherenceForce;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
+	float separationForce;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
+	float alignmentForce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
+	float SeparationDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
+	float SearchRadius;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -38,5 +50,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	/*UFUNCTION()
+	FActorBeginOverlapSignature OnActorBeginOverlap();
+	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);*/
 
 };

@@ -16,6 +16,8 @@ ABoid::ABoid()
     SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));
     SetRootComponent(VisualMesh);
     SphereComponent->SetGenerateOverlapEvents(true);
+    //SphereComponent->OnComponentBeginOverlap.Add(this, &ABoid::OverlapBegin);
+    SphereComponent->SetSphereRadius(SearchRadius);
 
     VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
     VisualMesh->SetupAttachment(SphereComponent);
@@ -29,6 +31,18 @@ ABoid::ABoid()
 
     //this->velocity = FVector(0.f, 0.f, 0.f);
 }
+
+//void ABoid::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//{
+//    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap gang 1"));
+//}
+//
+//
+//FActorBeginOverlapSignature ABoid::OnActorBeginOverlap()
+//{
+//    super::OnActorBeginOverlap();
+//    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Overlap gang 2"));
+//}
 
 
 // Called when the game starts or when spawned
@@ -53,12 +67,13 @@ void ABoid::Move(float DeltaTime)
 {
     FVector oldVelocity = velocity;
     TArray<AActor*> overlappingActors = GetOverlappingActors();
-    //DrawDebugSphere(GetWorld(), SphereComponent->GetComponentLocation(), 200.f, 10.f, FColor::Red, false);
+    DrawDebugSphere(GetWorld(), SphereComponent->GetComponentLocation(), SearchRadius, 5.f, FColor::Blue, false);
+    DrawDebugSphere(GetWorld(), SphereComponent->GetComponentLocation(), SeparationDistance, 5.f, FColor::Red, false);
 
     FVector OldLocation = GetActorLocation();
-    AdjustVectorTowards(DeltaTime, GetCoherencePoint(overlappingActors), 10);
-    AdjustVectorTowards(DeltaTime, GetSeparationPoint(overlappingActors), 20 , FColor::Red);
-    AdjustVectorTowards(DeltaTime, GetAlignmentPoint(overlappingActors), 50, FColor::Blue);
+    AdjustVectorTowards(DeltaTime, GetCoherencePoint(overlappingActors), coherenceForce);
+    AdjustVectorTowards(DeltaTime, GetSeparationPoint(overlappingActors), separationForce, FColor::Red);
+    AdjustVectorTowards(DeltaTime, GetAlignmentPoint(overlappingActors), alignmentForce, FColor::Blue);
 
 
 
@@ -91,7 +106,7 @@ TArray< AActor* > ABoid::GetOverlappingActors()
     TArray< AActor* > overlappingActors;
     SphereComponent->GetOverlappingActors(overlappingActors);
     FString debugText = FString::FromInt(overlappingActors.Num());
-    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, debugText);
+    //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, debugText);
     return overlappingActors;
 }
 
@@ -108,7 +123,9 @@ FVector ABoid::GetCoherencePoint(TArray< AActor* > actors)
 {
     FVector returnVec = FVector(0.f, 0.f, 0.f);
     for (AActor* actor : actors) {
-        if (actor == this) continue;
+        float distance = FVector::Dist2D(GetActorLocation(), actor->GetActorLocation());
+        if (actor == this || distance < SeparationDistance) continue;
+        DrawDebugLine(GetWorld(), GetActorLocation(), actor->GetActorLocation(), FColor::Blue);
         returnVec += actor->GetActorLocation();
     }
 
@@ -124,10 +141,10 @@ FVector ABoid::GetSeparationPoint(TArray< AActor* > actors)
         FVector toActor = actor->GetActorLocation() - GetActorLocation();
         toActor.Normalize();
         double dotProd = FVector::DotProduct(toActor, velocity);
-        if (distance < 300) {
-            DrawDebugLine(GetWorld(), GetActorLocation(), actor->GetActorLocation(), FColor::Blue);
+        if (distance < SeparationDistance) {
+            //DrawDebugLine(GetWorld(), GetActorLocation(), actor->GetActorLocation(), FColor::Blue);
             returnVec -= (GetActorLocation() - actor->GetActorLocation());
-            //returnVec *= ((300 - distance) / 10);
+            returnVec *= ((SeparationDistance - distance) / 3);
         }
     }
 
@@ -136,15 +153,18 @@ FVector ABoid::GetSeparationPoint(TArray< AActor* > actors)
 
 FVector ABoid::GetAlignmentPoint(TArray< AActor* > actors)
 {
+
+    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("BITCH I'M A COW"));
     FVector returnVec = FVector(0.f, 0.f, 0.f);
     for (AActor* actor : actors) {
         ABoid* boidActor = dynamic_cast<ABoid*>(actor);
-        if (boidActor == nullptr) continue;
-        if (actor == this) continue;
+        //if (boidActor == nullptr) continue;
+        float distance = FVector::Dist2D(GetActorLocation(), actor->GetActorLocation());
+        if (actor == this || distance < SeparationDistance) continue;
         returnVec += boidActor->GetVelocity();
     }
 
-    //returnVec *= 100;
+    returnVec *= 100;
 
     GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, (returnVec / actors.Num()).ToString());
     DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (returnVec / actors.Num()), FColor::Purple);
