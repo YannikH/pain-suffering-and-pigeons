@@ -19,7 +19,8 @@ private:
 	FVector GetAlignmentPoint(TArray< AActor* > actors);
 	void Move(float DeltaTime);
 	void RotateWithVelocity();
-	TArray< AActor* > GetOverlappingActors();
+	//TArray< AActor* > GetOverlappingActors();
+	void GetOverlappingActors(TArray<AActor*>& OutOverlappingActors);
 
 public:	
 	// Sets default values for this actor's properties

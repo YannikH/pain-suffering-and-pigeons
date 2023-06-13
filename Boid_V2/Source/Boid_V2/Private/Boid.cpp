@@ -14,7 +14,7 @@ ABoid::ABoid()
 
 
     SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collider"));
-    SetRootComponent(VisualMesh);
+    SetRootComponent(SphereComponent);
     SphereComponent->SetGenerateOverlapEvents(true);
     //SphereComponent->OnComponentBeginOverlap.Add(this, &ABoid::OverlapBegin);
     SphereComponent->SetSphereRadius(SearchRadius);
@@ -66,7 +66,9 @@ void ABoid::AdjustVectorTowards(float DeltaTime, FVector targetLocation, float f
 void ABoid::Move(float DeltaTime)
 {
     FVector oldVelocity = velocity;
-    TArray<AActor*> overlappingActors = GetOverlappingActors();
+    //TArray<AActor*> overlappingActors = GetOverlappingActors();
+    TArray<AActor*> overlappingActors;
+    GetOverlappingActors(overlappingActors);
     DrawDebugSphere(GetWorld(), SphereComponent->GetComponentLocation(), SearchRadius, 5.f, FColor::Blue, false);
     DrawDebugSphere(GetWorld(), SphereComponent->GetComponentLocation(), SeparationDistance, 5.f, FColor::Red, false);
 
@@ -101,13 +103,18 @@ void ABoid::RotateWithVelocity()
     VisualMesh->SetWorldRotation(rotation);
 }
 
-TArray< AActor* > ABoid::GetOverlappingActors()
+// TArray< AActor* > ABoid::GetOverlappingActors()
+// {
+//     TArray< AActor* > overlappingActors;
+//     SphereComponent->GetOverlappingActors(overlappingActors);
+//     FString debugText = FString::FromInt(overlappingActors.Num());
+//     //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, debugText);
+//     return overlappingActors;
+// }
+
+void ABoid::GetOverlappingActors(TArray<AActor*>& OutOverlappingActors)
 {
-    TArray< AActor* > overlappingActors;
-    SphereComponent->GetOverlappingActors(overlappingActors);
-    FString debugText = FString::FromInt(overlappingActors.Num());
-    //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, debugText);
-    return overlappingActors;
+    SphereComponent->GetOverlappingActors(OutOverlappingActors);
 }
 
 // Called every frame
@@ -154,7 +161,7 @@ FVector ABoid::GetSeparationPoint(TArray< AActor* > actors)
 FVector ABoid::GetAlignmentPoint(TArray< AActor* > actors)
 {
 
-    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("BITCH I'M A COW"));
+    //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("BITCH I'M A COW"));
     FVector returnVec = FVector(0.f, 0.f, 0.f);
     for (AActor* actor : actors) {
         ABoid* boidActor = dynamic_cast<ABoid*>(actor);
@@ -166,7 +173,7 @@ FVector ABoid::GetAlignmentPoint(TArray< AActor* > actors)
 
     returnVec *= 100;
 
-    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, (returnVec / actors.Num()).ToString());
+    //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, (returnVec / actors.Num()).ToString());
     DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + (returnVec / actors.Num()), FColor::Purple);
     return GetActorLocation() + (returnVec / actors.Num());
 }
