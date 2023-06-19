@@ -11,48 +11,46 @@ UCLASS()
 class BOID_V2_API ABoid : public AActor
 {
 	GENERATED_BODY()
+
+	public:	
+	ABoid();
+
 	
 private:
+	UPROPERTY(meta = (AllowPrivateAccess = "true"), Category = "Components", VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* VisualMesh;
+	UPROPERTY(meta = (AllowPrivateAccess = "true"), Category = "Components", VisibleAnywhere, BlueprintReadOnly)
+	USphereComponent* SphereComponent;
+
+	UPROPERTY(Category = "Values", EditAnywhere)
+	FVector velocity = FVector(
+        -5 + FMath::RandRange(0, 10),
+        -5 + FMath::RandRange(0, 10),
+        0.0f
+    );
+
+	UPROPERTY(Category = "Flocking Weights", EditAnywhere)
+	float coherenceForce = 1.0f;
+	UPROPERTY(Category = "Flocking Weights", EditAnywhere)
+	float separationForce = 1.0f;
+	UPROPERTY(Category = "Flocking Weights", EditAnywhere)
+	float alignmentForce = 1.0f;
+	UPROPERTY(Category = "Flocking Weights", EditAnywhere)
+	float SeparationDistance = 1.0f;
+	UPROPERTY(Category = "Flocking Weights", EditAnywhere)
+	float SearchRadius = 500.0f;
+
+protected:
+	virtual void BeginPlay() override;
+	FVector GetVelocity();
 	void AdjustVectorTowards(float DeltaTime, FVector targetLocation, float force, FColor debugColor);
 	FVector GetCoherencePoint(TArray< AActor* > actors);
 	FVector GetSeparationPoint(TArray< AActor* > actors);
 	FVector GetAlignmentPoint(TArray< AActor* > actors);
 	void Move(float DeltaTime);
 	void RotateWithVelocity();
-	//TArray< AActor* > GetOverlappingActors();
 	void GetOverlappingActors(TArray<AActor*>& OutOverlappingActors);
 
-public:	
-	// Sets default values for this actor's properties
-	ABoid();
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* VisualMesh;
-	UPROPERTY(VisibleAnywhere)
-	USphereComponent* SphereComponent;
-	FVector GetVelocity();
-	FVector velocity;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
-	float coherenceForce;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
-	float separationForce;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
-	float alignmentForce;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
-	float SeparationDistance;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flocking Weights")
-	float SearchRadius;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
+public:
 	virtual void Tick(float DeltaTime) override;
-	/*UFUNCTION()
-	FActorBeginOverlapSignature OnActorBeginOverlap();
-	void OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);*/
-
 };
